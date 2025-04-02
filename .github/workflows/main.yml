@@ -1,0 +1,52 @@
+name: "Main workflow for test_app"
+on:
+  push:
+    branches: ["main"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Build test_app
+        uses: D3rHase/ssh-command-action@v0.3.1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command: |
+            cd ${{ secrets.PROJECT_FOLDER }};
+            git clone https://github.com/sdnv0x4d/test_app;
+            cd /test_app;
+            docker compose build;
+  validator:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Clone repo
+        uses: GuillaumeFalourd/clone-github-repo-action@v2.3
+        with:
+          depth: 1
+          branch: 'main'
+          owner: 'sdnv0x4d'
+          repository: 'test_app'
+      - name: HTML5 Validator
+        uses: Cyb3r-Jak3/html5validator-action@master
+        with:
+          root: html/
+  deploy:
+    needs: [build, validator]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy test_app to prod
+        uses: D3rHase/ssh-command-action@v0.3.1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command: |
+            cd ${{ secrets.PROJECT_FOLDER }};
+            docker compose up -d;
+            sleep 10;
+            echo "Latest logs:"
+            docker compose logs;
