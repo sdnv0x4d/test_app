@@ -50,7 +50,7 @@ jobs:
         uses: Cyb3r-Jak3/html5validator-action@v7.1.1
         with:
           # Path of the files to test
-          root: ./ # optional
+          root: html/ # optional
         continue-on-error: true
 
 
