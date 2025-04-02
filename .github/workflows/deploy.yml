@@ -1,0 +1,21 @@
+name: "Deploy test_app"
+on:
+  push:
+    branches: ["main"]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy test_app to prod
+        uses: D3rHase/ssh-command-action@v0.3.1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command: |
+            cd ${{ secrets.PROJECT_FOLDER }};
+            docker compose up -d;
+            sleep 10;
+            echo "Latest logs:"
+            docker compose logs;
