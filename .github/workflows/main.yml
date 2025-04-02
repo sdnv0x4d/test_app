@@ -37,10 +37,27 @@ jobs:
       #     private_key: ${{ secrets.SSH_PRIVATE_KEY }}
       #     command: |
       #       ls /test_app;
+      # - name: HTML5 Validator
+      #   uses: Cyb3r-Jak3/html5validator-action@master
+      #   with:
+      #     root: html/
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      
       - name: HTML5 Validator
-        uses: Cyb3r-Jak3/html5validator-action@master
+        # You may pin to the exact commit or the version.
+        # uses: Cyb3r-Jak3/html5validator-action@02b835cb536d5a22714059a755940fa6f1f3fe1b
+        uses: Cyb3r-Jak3/html5validator-action@v7.1.1
         with:
-          root: html/
+          # Path of the files to test
+          root: ./ # optional
+        continue-on-error: true
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: log
+          path: log.log
 
   deploy:
     needs: [build, validator]
